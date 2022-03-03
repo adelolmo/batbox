@@ -1,0 +1,8 @@
+Package: batbox
+Version: ==version==
+Architecture: ==architecture==
+Maintainer: Andoni del Olmo <andoni.delolmo@email.com>
+Installed-Size: ==size==
+Section: extras
+Priority: standard
+Description: The Terror of Mechagodzilla - The True Story by Fredrik Ramsberg

@@ -1,0 +1,5 @@
+name: batbox
+id: github.com/andoni/mechagodzilla-true-story
+type: go-cli
+description: The Terror of Mechagodzilla - The True Story by Fredrik Ramsberg
+author: Andoni del Olmo <andoni.delolmo@email.com>
