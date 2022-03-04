@@ -49,7 +49,7 @@ func (bat *Batch) parseIfStatement(line string) string {
 	commandToExecute := statement[index+1:]
 	if len(conditionParts[0]) == 4 { // "%1"
 		argumentName := strings.ReplaceAll(conditionParts[0], "\"", "")
-		batchArgumentValue := strings.ReplaceAll(conditionParts[1], "\"", "")
+		batchArgumentValue := bat.resolveVariable(strings.ReplaceAll(conditionParts[1], "\"", ""))
 
 		if isNegation {
 			if bat.arguments[argumentName] != batchArgumentValue {
