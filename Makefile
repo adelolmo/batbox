@@ -1,4 +1,4 @@
-#MAKEFLAGS += --silent
+MAKEFLAGS += --silent
 
 BIN_DIR=usr/bin
 BIN=batbox

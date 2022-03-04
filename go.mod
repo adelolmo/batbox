@@ -1,3 +1,3 @@
-module github.com/andoni/mechagodzilla-true-story
+module github.com/adelolmo/batbox
 
 go 1.16
