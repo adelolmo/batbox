@@ -10,8 +10,7 @@ func (b Batch) handleEchoDot() {
 }
 
 func (b Batch) handleEcho(line string) {
-	s := line[len("ECHO "):]
-	fmt.Println(s)
+	fmt.Println(line[len("ECHO "):])
 }
 
 func (b *Batch) handleSet(line string) {
