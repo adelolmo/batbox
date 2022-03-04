@@ -81,11 +81,20 @@ func (b *Batch) ExecuteCommand(line string) error {
 
 func (b *Batch) SetArguments(args []string) {
 	for i := range args {
-		argumentName := "%" + strconv.Itoa(i+1)
+		argumentName := args[i]
+		if strings.HasPrefix(argumentName, "%") {
+			name := "%" + strconv.Itoa(i+1)
+			value := strings.ReplaceAll(args[i], "\n", "")
+			b.arguments[name] = b.arguments[value]
+			continue
+		}
+
+		argumentName = "%" + strconv.Itoa(i+1)
 		if args[i] == argumentName {
 			continue
 		}
-		b.arguments[argumentName] = args[i]
+		value := strings.ReplaceAll(args[i], "\n", "")
+		b.arguments[argumentName] = value
 	}
 }
 
