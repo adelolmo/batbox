@@ -2,15 +2,19 @@ package batch
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 )
 
+var out io.Writer = os.Stdout
+
 func (b Batch) handleEchoDot() {
-	fmt.Println()
+	fmt.Fprintln(out)
 }
 
 func (b Batch) handleEcho(line string) {
-	fmt.Println(line[len("ECHO "):])
+	fmt.Fprintln(out, line[len("ECHO "):])
 }
 
 func (b *Batch) handleSet(line string) {
