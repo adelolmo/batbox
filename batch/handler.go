@@ -5,36 +5,36 @@ import (
 	"strings"
 )
 
-func (bat Batch) handleEchoDot() {
+func (b Batch) handleEchoDot() {
 	fmt.Println()
 }
 
-func (bat Batch) handleEcho(line string) {
+func (b Batch) handleEcho(line string) {
 	s := line[len("ECHO "):]
 	fmt.Println(s)
 }
 
-func (bat *Batch) handleSet(line string) {
-	key, value := bat.parseVariable(line)
-	bat.variables[key] = value
+func (b *Batch) handleSet(line string) {
+	key, value := b.parseVariable(line)
+	b.variables[key] = value
 }
 
-func (bat *Batch) handleGoto(line string) {
-	bat.continueTo = ":" + line[len("GOTO "):]
+func (b *Batch) handleGoto(line string) {
+	b.continueTo = ":" + line[len("GOTO "):]
 }
 
-func (bat *Batch) handleIf(line string) string {
-	return bat.parseIfStatement(line)
+func (b *Batch) handleIf(line string) string {
+	return b.parseIfStatement(line)
 }
 
-func (bat *Batch) parseVariable(text string) (string, string) {
+func (b *Batch) parseVariable(text string) (string, string) {
 	parts := strings.Split(text, "=")
 	key := (parts[0])[len("SET "):]
-	value := bat.resolveVariable(parts[1])
+	value := b.resolveVariable(parts[1])
 	return key, value
 }
 
-func (bat *Batch) parseIfStatement(line string) string {
+func (b *Batch) parseIfStatement(line string) string {
 	var statement string
 	isNegation := false
 	statement = line[len("IF "):]
@@ -47,44 +47,44 @@ func (bat *Batch) parseIfStatement(line string) string {
 	conditionParts := strings.Split(statementParts, "==")
 	index := strings.Index(statement, " ")
 	commandToExecute := statement[index+1:]
-	if len(conditionParts[0]) == 4 { // "%1"
-		argumentName := strings.ReplaceAll(conditionParts[0], "\"", "")
-		batchArgumentValue := bat.resolveVariable(strings.ReplaceAll(conditionParts[1], "\"", ""))
 
-		if isNegation {
-			if bat.arguments[argumentName] != batchArgumentValue {
-				return commandToExecute
-			}
-		} else {
-			if bat.arguments[argumentName] == batchArgumentValue {
-				return commandToExecute
-			}
-		}
-		return ""
+	var firstPartValue string
+	if len(conditionParts[0]) == 4 {
+		firstPartValue = b.resolveArgument(conditionParts[0])
+	} else if strings.HasPrefix(conditionParts[0], "\"%") {
+		firstPartValue = b.resolveVariable(conditionParts[0])
+	} else {
+		firstPartValue = conditionParts[0]
 	}
-	if strings.HasPrefix(conditionParts[0], "\"%") {
-		firstPartVariableValue := bat.resolveVariable(conditionParts[0])
-		secondPartVariable := bat.resolveVariable(conditionParts[1])
+	secondPartVariable := b.resolveVariable(conditionParts[1])
 
-		if isNegation {
-			if firstPartVariableValue != secondPartVariable {
-				return commandToExecute
-			}
-		} else {
-			if firstPartVariableValue == secondPartVariable {
-				return commandToExecute
-			}
+	if isNegation {
+		if firstPartValue != secondPartVariable {
+			return commandToExecute
+		}
+	} else {
+		if firstPartValue == secondPartVariable {
+			return commandToExecute
 		}
 	}
 	return ""
 }
 
-func (bat *Batch) resolveVariable(variable string) string {
-	variableName := strings.ReplaceAll(variable, "\"", "")
+func (b *Batch) resolveArgument(argument string) string {
+	argumentName := sanitizeVariableName(argument)
+	return b.arguments[argumentName]
+}
+
+func (b *Batch) resolveVariable(variable string) string {
+	variableName := sanitizeVariableName(variable)
 	if strings.HasPrefix(variableName, "%") {
 		variableName = strings.ReplaceAll(variableName, "%", "")
-		variableValue := bat.variables[variableName]
+		variableValue := b.variables[variableName]
 		return variableValue
 	}
 	return variableName
+}
+
+func sanitizeVariableName(variable string) string {
+	return strings.ReplaceAll(variable, "\"", "")
 }

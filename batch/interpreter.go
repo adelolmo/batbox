@@ -45,51 +45,51 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	return nil
 }
 
-func (bat *Batch) ExecuteCommand(line string) error {
-	if bat.continueTo != "" {
-		if bat.continueTo != line {
+func (b *Batch) ExecuteCommand(line string) error {
+	if b.continueTo != "" {
+		if b.continueTo != line {
 			return nil
 		}
-		bat.continueTo = ""
+		b.continueTo = ""
 		return nil
 	}
 
-	filename, isBat := bat.checkBatchFile(line)
+	filename, isBat := b.checkBatchFile(line)
 	if isBat {
-		bat.currentFile = filename
-		bat.currentFileLine = 0
-		return bat.processFile(filepath.Join(bat.directory, filename))
+		b.currentFile = filename
+		b.currentFileLine = 0
+		return b.processFile(filepath.Join(b.directory, filename))
 	}
 	if strings.HasPrefix(line, "SET ") {
-		bat.handleSet(line)
+		b.handleSet(line)
 	}
 	if strings.HasPrefix(line, "ECHO.") {
-		bat.handleEchoDot()
+		b.handleEchoDot()
 	}
 	if strings.HasPrefix(line, "ECHO ") {
-		bat.handleEcho(line)
+		b.handleEcho(line)
 	}
 	if strings.HasPrefix(line, "GOTO ") {
-		bat.handleGoto(line)
+		b.handleGoto(line)
 	}
 	if strings.HasPrefix(line, "IF ") {
-		commandToExecute := bat.handleIf(line)
-		return bat.ExecuteCommand(commandToExecute)
+		commandToExecute := b.handleIf(line)
+		return b.ExecuteCommand(commandToExecute)
 	}
 	return nil
 }
 
-func (bat *Batch) SetArguments(args []string) {
+func (b *Batch) SetArguments(args []string) {
 	for i := range args {
 		argumentName := "%" + strconv.Itoa(i+1)
 		if args[i] == argumentName {
 			continue
 		}
-		bat.arguments[argumentName] = args[i]
+		b.arguments[argumentName] = args[i]
 	}
 }
 
-func (bat *Batch) processFile(filepath string) error {
+func (b *Batch) processFile(filepath string) error {
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Fatal(err)
@@ -99,12 +99,12 @@ func (bat *Batch) processFile(filepath string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		bat.currentFileLine++
+		b.currentFileLine++
 
 		if strings.HasPrefix(line, "@") {
 			continue
 		}
-		err = bat.ExecuteCommand(line)
+		err = b.ExecuteCommand(line)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -114,12 +114,12 @@ func (bat *Batch) processFile(filepath string) error {
 	return nil
 }
 
-func (bat *Batch) checkBatchFile(line string) (string, bool) {
+func (b *Batch) checkBatchFile(line string) (string, bool) {
 	parts := strings.Split(line, " ")
-	for i := range bat.batchFiles {
-		if bat.batchFiles[i] == strings.ToUpper(parts[0])+".BAT" {
-			bat.SetArguments(parts[1:])
-			return bat.batchFiles[i], true
+	for i := range b.batchFiles {
+		if b.batchFiles[i] == strings.ToUpper(parts[0])+".BAT" {
+			b.SetArguments(parts[1:])
+			return b.batchFiles[i], true
 		}
 	}
 	return "", false
