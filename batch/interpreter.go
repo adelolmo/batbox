@@ -2,7 +2,6 @@ package batch
 
 import (
 	"bufio"
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"strings"
 )
 
-var continueTo = ""
 var batchFiles []string
 
 type Batch struct {
@@ -21,6 +19,7 @@ type Batch struct {
 	currentFile     string
 	currentFileLine int
 	arguments       map[string]string
+	continueTo      string
 }
 
 func NewInterpreter(directory string) Batch {
@@ -34,6 +33,7 @@ func NewInterpreter(directory string) Batch {
 		currentFileLine: 0,
 		arguments:       map[string]string{},
 		batchFiles:      batchFiles,
+		continueTo:      "",
 	}
 }
 
@@ -46,36 +46,34 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 }
 
 func (bat *Batch) ExecuteCommand(line string) error {
-	if continueTo != "" {
-		if continueTo != line {
+	if bat.continueTo != "" {
+		if bat.continueTo != line {
 			return nil
 		}
-		continueTo = ""
+		bat.continueTo = ""
 		return nil
 	}
 
-	if strings.HasPrefix(line, "SET ") {
-		key, value := bat.parseVariable(line)
-		bat.variables[key] = value
-	}
 	filename, isBat := bat.checkBatchFile(line)
 	if isBat {
 		bat.currentFile = filename
 		bat.currentFileLine = 0
 		return bat.processFile(filepath.Join(bat.directory, filename))
 	}
+	if strings.HasPrefix(line, "SET ") {
+		bat.handleSet(line)
+	}
 	if strings.HasPrefix(line, "ECHO.") {
-		fmt.Println()
+		bat.handleEchoDot()
 	}
 	if strings.HasPrefix(line, "ECHO ") {
-		s := line[len("ECHO "):]
-		fmt.Println(s)
+		bat.handleEcho(line)
 	}
 	if strings.HasPrefix(line, "GOTO ") {
-		continueTo = ":" + line[len("GOTO "):]
+		bat.handleGoto(line)
 	}
 	if strings.HasPrefix(line, "IF ") {
-		commandToExecute := bat.parseIfStatement(line)
+		commandToExecute := bat.handleIf(line)
 		return bat.ExecuteCommand(commandToExecute)
 	}
 	return nil
@@ -114,66 +112,6 @@ func (bat *Batch) processFile(filepath string) error {
 	}
 
 	return nil
-}
-func (bat *Batch) parseIfStatement(line string) string {
-	var statement string
-	isNegation := false
-	statement = line[len("IF "):]
-	if strings.HasPrefix(line, "IF NOT ") {
-		statement = line[len("IF NOT "):]
-		isNegation = true
-	}
-
-	statementParts := strings.Split(statement, " ")[0]
-	conditionParts := strings.Split(statementParts, "==")
-	index := strings.Index(statement, " ")
-	commandToExecute := statement[index+1:]
-	if len(conditionParts[0]) == 4 { // "%1"
-		argumentName := strings.ReplaceAll(conditionParts[0], "\"", "")
-		batchArgumentValue := strings.ReplaceAll(conditionParts[1], "\"", "")
-
-		if isNegation {
-			if bat.arguments[argumentName] != batchArgumentValue {
-				return commandToExecute
-			}
-		} else {
-			if bat.arguments[argumentName] == batchArgumentValue {
-				return commandToExecute
-			}
-		}
-		return ""
-	}
-	if strings.HasPrefix(conditionParts[0], "\"%") {
-		firstPartVariableValue := bat.resolveVariable(conditionParts[0])
-		secondPartVariable := bat.resolveVariable(conditionParts[1])
-
-		if isNegation {
-			if firstPartVariableValue != secondPartVariable {
-				return commandToExecute
-			}
-		} else {
-			if firstPartVariableValue == secondPartVariable {
-				return commandToExecute
-			}
-		}
-	}
-	return ""
-}
-func (bat *Batch) resolveVariable(variable string) string {
-	variableName := strings.ReplaceAll(variable, "\"", "")
-	if strings.HasPrefix(variableName, "%") {
-		variableName = strings.ReplaceAll(variableName, "%", "")
-		variableValue := bat.variables[variableName]
-		return variableValue
-	}
-	return variableName
-}
-
-func (bat *Batch) parseVariable(text string) (string, string) {
-	parts := strings.Split(text, "=")
-	key := (parts[0])[len("SET "):]
-	value := bat.resolveVariable(parts[1])
-	return key, value
 }
 
 func (bat *Batch) checkBatchFile(line string) (string, bool) {
