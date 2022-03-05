@@ -18,7 +18,9 @@ func (b Batch) handleEcho(line string) {
 }
 
 func (b *Batch) handleSet(line string) {
-	key, value := b.parseVariable(line)
+	parts := strings.Split(line, "=")
+	key := (parts[0])[len("SET "):]
+	value := b.resolveVariable(parts[1])
 	b.variables[key] = value
 }
 
@@ -27,17 +29,6 @@ func (b *Batch) handleGoto(line string) {
 }
 
 func (b *Batch) handleIf(line string) string {
-	return b.parseIfStatement(line)
-}
-
-func (b *Batch) parseVariable(text string) (string, string) {
-	parts := strings.Split(text, "=")
-	key := (parts[0])[len("SET "):]
-	value := b.resolveVariable(parts[1])
-	return key, value
-}
-
-func (b *Batch) parseIfStatement(line string) string {
 	var statement string
 	isNegation := false
 	statement = line[len("IF "):]
@@ -74,12 +65,12 @@ func (b *Batch) parseIfStatement(line string) string {
 }
 
 func (b *Batch) resolveArgument(argument string) string {
-	argumentName := sanitizeVariableName(argument)
+	argumentName := removeQuotes(argument)
 	return b.arguments[argumentName]
 }
 
 func (b *Batch) resolveVariable(variable string) string {
-	variableName := sanitizeVariableName(variable)
+	variableName := removeQuotes(variable)
 	if strings.HasPrefix(variableName, "%") {
 		variableName = strings.ReplaceAll(variableName, "%", "")
 		variableValue := b.variables[variableName]
@@ -88,6 +79,6 @@ func (b *Batch) resolveVariable(variable string) string {
 	return variableName
 }
 
-func sanitizeVariableName(variable string) string {
+func removeQuotes(variable string) string {
 	return strings.ReplaceAll(variable, "\"", "")
 }

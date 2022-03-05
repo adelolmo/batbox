@@ -121,8 +121,8 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				arguments:       tt.fields.arguments,
 				continueTo:      tt.fields.continueTo,
 			}
-			if got := bat.parseIfStatement(tt.args.line); got != tt.want {
-				t.Errorf("parseIfStatement() = %v, want %v", got, tt.want)
+			if got := bat.handleIf(tt.args.line); got != tt.want {
+				t.Errorf("handleIf() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -166,6 +166,64 @@ func TestBatch_handleEcho(t *testing.T) {
 			got := strings.TrimSpace(buf.String())
 			if got != tt.want {
 				t.Errorf("handleEcho() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBatch_handleSet(t *testing.T) {
+	type fields struct {
+		directory       string
+		batchFiles      []string
+		variables       map[string]string
+		currentFile     string
+		currentFileLine int
+		arguments       map[string]string
+		continueTo      string
+	}
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   map[string]string
+	}{
+		{
+			name:   "set value",
+			fields: fields{variables: map[string]string{}},
+			args:   args{line: "SET &l5w=m7w"},
+			want:   map[string]string{"&l5w": "m7w"},
+		},
+		{
+			name: "set variable",
+			fields: fields{
+				variables: map[string]string{
+					"&l5w": "m7w",
+				},
+			},
+			args: args{line: "SET &l5w=%&l5w%"},
+			want: map[string]string{"&l5w": "m7w"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Batch{
+				directory:       tt.fields.directory,
+				batchFiles:      tt.fields.batchFiles,
+				variables:       tt.fields.variables,
+				currentFile:     tt.fields.currentFile,
+				currentFileLine: tt.fields.currentFileLine,
+				arguments:       tt.fields.arguments,
+				continueTo:      tt.fields.continueTo,
+			}
+			b.handleSet(tt.args.line)
+			for wantKey := range tt.want {
+				got := b.variables[wantKey]
+				if tt.want[wantKey] != got {
+					t.Errorf("handleSet() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
