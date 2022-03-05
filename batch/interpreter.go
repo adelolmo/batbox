@@ -2,6 +2,7 @@ package batch
 
 import (
 	"bufio"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -77,6 +78,15 @@ func (b *Batch) ExecuteCommand(line string) error {
 	filename, isBat := b.checkBatchFile(line)
 	if isBat {
 		return b.processFile(filename)
+	}
+	if "PAUSE" == line {
+		fmt.Print("Press any key to continue.")
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		scanner.Text()
+	}
+	if "CLS" == line {
+		fmt.Print("\033[H\033[2J")
 	}
 	if strings.HasPrefix(line, "SET ") {
 		b.handleSet(line)
