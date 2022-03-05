@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	_ "embed"
 	"fmt"
 	"github.com/adelolmo/batbox/batch"
@@ -23,16 +24,14 @@ func main() {
 	fmt.Printf("Using directory: %s\n", directory)
 
 	bat := batch.NewInterpreter(directory)
-	for true {
-		var userInput string
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
 		fmt.Print("> ")
-		_, err := fmt.Scanln(&userInput)
-		if err != nil {
-			panic(err)
-		}
-		userArguments := strings.Split(userInput, " ")
-		bat.SetArguments(userArguments[1:])
-		err = bat.ExecuteCommand(strings.ReplaceAll(userInput, "\n", ""))
+		scanner.Scan()
+		userInput := scanner.Text()
+		bat.SetArguments(strings.Split(userInput, " ")[1:])
+		err := bat.ExecuteCommand(userInput)
 		if err != nil {
 			panic(err)
 		}
