@@ -23,7 +23,7 @@ type Batch struct {
 }
 
 func NewInterpreter(directory string) Batch {
-	err := filepath.Walk(directory, walkFn)
+	err := filepath.Walk(directory, collectBatchFiles)
 	if err != nil {
 		panic(err)
 	}
@@ -37,12 +37,29 @@ func NewInterpreter(directory string) Batch {
 	}
 }
 
-func walkFn(path string, info fs.FileInfo, err error) error {
+func collectBatchFiles(path string, info fs.FileInfo, err error) error {
 	if filepath.Ext(info.Name()) != ".BAT" {
 		return nil
 	}
 	batchFiles = append(batchFiles, info.Name())
 	return nil
+}
+
+func (b *Batch) SetArguments(args []string) {
+	for i := range args {
+		argumentName := args[i]
+		if strings.HasPrefix(argumentName, "%") {
+			name := "%" + strconv.Itoa(i+1)
+			b.arguments[name] = b.arguments[args[i]]
+			continue
+		}
+
+		argumentName = "%" + strconv.Itoa(i+1)
+		if args[i] == argumentName {
+			continue
+		}
+		b.arguments[argumentName] = args[i]
+	}
 }
 
 func (b *Batch) ExecuteCommand(line string) error {
@@ -54,11 +71,12 @@ func (b *Batch) ExecuteCommand(line string) error {
 		return nil
 	}
 
+	if strings.HasPrefix(line, "@") {
+		return nil
+	}
 	filename, isBat := b.checkBatchFile(line)
 	if isBat {
-		b.currentFile = filename
-		b.currentFileLine = 0
-		return b.processFile(filepath.Join(b.directory, filename))
+		return b.processFile(filename)
 	}
 	if strings.HasPrefix(line, "SET ") {
 		b.handleSet(line)
@@ -79,27 +97,11 @@ func (b *Batch) ExecuteCommand(line string) error {
 	return nil
 }
 
-func (b *Batch) SetArguments(args []string) {
-	for i := range args {
-		argumentName := args[i]
-		if strings.HasPrefix(argumentName, "%") {
-			name := "%" + strconv.Itoa(i+1)
-			value := strings.ReplaceAll(args[i], "\n", "")
-			b.arguments[name] = b.arguments[value]
-			continue
-		}
+func (b *Batch) processFile(filename string) error {
+	b.currentFile = filename
+	b.currentFileLine = 0
 
-		argumentName = "%" + strconv.Itoa(i+1)
-		if args[i] == argumentName {
-			continue
-		}
-		value := strings.ReplaceAll(args[i], "\n", "")
-		b.arguments[argumentName] = value
-	}
-}
-
-func (b *Batch) processFile(filepath string) error {
-	file, err := os.Open(filepath)
+	file, err := os.Open(filepath.Join(b.directory, filename))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,10 +111,6 @@ func (b *Batch) processFile(filepath string) error {
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		b.currentFileLine++
-
-		if strings.HasPrefix(line, "@") {
-			continue
-		}
 		err = b.ExecuteCommand(line)
 	}
 
