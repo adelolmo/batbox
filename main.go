@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	_ "embed"
 	"fmt"
 	"github.com/adelolmo/batbox/batch"
@@ -25,9 +24,12 @@ func main() {
 
 	bat := batch.NewInterpreter(directory)
 	for true {
-		reader := bufio.NewReader(os.Stdin)
+		var userInput string
 		fmt.Print("> ")
-		userInput, err := reader.ReadString('\n')
+		_, err := fmt.Scanln(&userInput)
+		if err != nil {
+			panic(err)
+		}
 		userArguments := strings.Split(userInput, " ")
 		bat.SetArguments(userArguments[1:])
 		err = bat.ExecuteCommand(strings.ReplaceAll(userInput, "\n", ""))
