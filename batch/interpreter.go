@@ -14,27 +14,35 @@ import (
 var batchFiles []string
 
 type Batch struct {
-	directory       string
-	batchFiles      []string
-	variables       map[string]string
-	currentFile     string
-	currentFileLine int
-	arguments       map[string]string
-	continueTo      string
+	directory      string
+	batchFiles     []string
+	variables      map[string]string
+	arguments      map[string]string
+	continueTo     string
+	executionStack executionStack
 }
 
-func NewInterpreter(directory string) Batch {
+type executionStack struct {
+	fileStack []executingBatchFile
+}
+
+type executingBatchFile struct {
+	name       string
+	lineNumber int
+}
+
+func NewInterpreter(directory string) *Batch {
 	err := filepath.Walk(directory, collectBatchFiles)
 	if err != nil {
 		panic(err)
 	}
-	return Batch{
-		directory:       directory,
-		variables:       map[string]string{},
-		currentFileLine: 0,
-		arguments:       map[string]string{},
-		batchFiles:      batchFiles,
-		continueTo:      "",
+	return &Batch{
+		directory:      directory,
+		variables:      map[string]string{},
+		arguments:      map[string]string{},
+		batchFiles:     batchFiles,
+		continueTo:     "",
+		executionStack: executionStack{fileStack: []executingBatchFile{}},
 	}
 }
 
@@ -47,6 +55,9 @@ func collectBatchFiles(path string, info fs.FileInfo, err error) error {
 }
 
 func (b *Batch) SetArguments(args []string) {
+	if len(args) == 0 {
+		b.arguments = make(map[string]string)
+	}
 	for i := range args {
 		argumentName := args[i]
 		if strings.HasPrefix(argumentName, "%") {
@@ -72,21 +83,25 @@ func (b *Batch) ExecuteCommand(line string) error {
 		return nil
 	}
 
+	if len(line) == 0 {
+		return nil
+	}
 	if strings.HasPrefix(line, "@") {
 		return nil
 	}
+	if strings.HasPrefix(line, "REM ") {
+		return nil
+	}
+	b.logCommand(line)
 	filename, isBat := b.checkBatchFile(line)
 	if isBat {
 		return b.processFile(filename)
 	}
 	if "PAUSE" == line {
-		fmt.Print("Press any key to continue.")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		scanner.Text()
+		b.handlePause()
 	}
 	if "CLS" == line {
-		fmt.Print("\033[H\033[2J")
+		b.handleClearScreen()
 	}
 	if strings.HasPrefix(line, "SET ") {
 		b.handleSet(line)
@@ -108,8 +123,7 @@ func (b *Batch) ExecuteCommand(line string) error {
 }
 
 func (b *Batch) processFile(filename string) error {
-	b.currentFile = filename
-	b.currentFileLine = 0
+	b.setCurrentFile(filename)
 
 	file, err := os.Open(filepath.Join(b.directory, filename))
 	if err != nil {
@@ -120,7 +134,7 @@ func (b *Batch) processFile(filename string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		b.currentFileLine++
+		b.executionStack.increaseExecutionLine()
 		err = b.ExecuteCommand(line)
 	}
 
@@ -128,6 +142,9 @@ func (b *Batch) processFile(filename string) error {
 		log.Fatal(err)
 	}
 
+	b.executionStack.drop()
+
+	b.arguments = make(map[string]string)
 	return nil
 }
 
@@ -140,4 +157,38 @@ func (b *Batch) checkBatchFile(line string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func (b *Batch) setCurrentFile(filename string) {
+	batchFile := executingBatchFile{
+		name:       filename,
+		lineNumber: 0,
+	}
+	b.executionStack.push(batchFile)
+}
+
+func (b *Batch) logCommand(line string) {
+	if len(b.executionStack.fileStack) == 0 {
+		return
+	}
+
+	batchFile := b.executionStack.fileStack[len(b.executionStack.fileStack)-1]
+	_, err := fmt.Fprintf(out, "\t%v %d\t%v\n", batchFile.name, batchFile.lineNumber, line)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (f *executionStack) increaseExecutionLine() {
+	topFile := &f.fileStack[len(f.fileStack)-1]
+	topFile.lineNumber++
+}
+
+func (f *executionStack) drop() {
+	topElementIndex := len(f.fileStack) - 1
+	f.fileStack = f.fileStack[:topElementIndex]
+}
+
+func (f *executionStack) push(file executingBatchFile) {
+	f.fileStack = append(f.fileStack, file)
 }

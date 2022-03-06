@@ -149,7 +149,12 @@ func TestBatch_handleEcho(t *testing.T) {
 		args   args
 		want   string
 	}{
-		{name: "echo", fields: fields{}, args: args{line: "ECHO a test"}, want: "a test"},
+		{
+			name:   "echo",
+			fields: fields{},
+			args:   args{line: "ECHO a test"},
+			want:   "a test",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

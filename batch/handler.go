@@ -1,6 +1,7 @@
 package batch
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -8,6 +9,17 @@ import (
 )
 
 var out io.Writer = os.Stdout
+
+func (b *Batch) handlePause() {
+	fmt.Print("Press any key to continue.")
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	scanner.Text()
+}
+
+func (b *Batch) handleClearScreen() {
+	fmt.Print("\033[H\033[2J")
+}
 
 func (b Batch) handleEchoDot() {
 	fmt.Fprintln(out)

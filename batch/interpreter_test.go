@@ -71,18 +71,26 @@ func TestBatch_checkBatchFile(t *testing.T) {
 				"%2": "turtle",
 				"%3": "",
 			},
+		}, {
+			name: "file without arguments",
+			fields: fields{
+				batchFiles: []string{"L5W.BAT"},
+				arguments:  map[string]string{"%1": "man"},
+			},
+			args:          args{line: "l5w"},
+			want:          "L5W.BAT",
+			wantIsBatch:   true,
+			wantArguments: map[string]string{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Batch{
-				directory:       tt.fields.directory,
-				batchFiles:      tt.fields.batchFiles,
-				variables:       tt.fields.variables,
-				currentFile:     tt.fields.currentFile,
-				currentFileLine: tt.fields.currentFileLine,
-				arguments:       tt.fields.arguments,
-				continueTo:      tt.fields.continueTo,
+				directory:  tt.fields.directory,
+				batchFiles: tt.fields.batchFiles,
+				variables:  tt.fields.variables,
+				arguments:  tt.fields.arguments,
+				continueTo: tt.fields.continueTo,
 			}
 			got, got1 := b.checkBatchFile(tt.args.line)
 			if got != tt.want {
@@ -90,6 +98,9 @@ func TestBatch_checkBatchFile(t *testing.T) {
 			}
 			if got1 != tt.wantIsBatch {
 				t.Errorf("checkBatchFile() got isBatch = %v, want %v", got1, tt.wantIsBatch)
+			}
+			if len(tt.wantArguments) != len(b.arguments) {
+				t.Errorf("checkBatchFile() got %v, want %v arguments", len(tt.wantArguments), b.arguments)
 			}
 			for wantArgName := range tt.wantArguments {
 				if tt.wantArguments[wantArgName] != b.arguments[wantArgName] {
