@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-var batchFiles []string
-
 type Batch struct {
 	directory      string
 	batchFiles     []string
@@ -23,7 +21,7 @@ type Batch struct {
 }
 
 func NewInterpreter(directory string) *Batch {
-	err := filepath.Walk(directory, collectBatchFiles)
+	batchFiles, err := collectBatchFiles(directory)
 	if err != nil {
 		panic(err)
 	}
@@ -37,12 +35,16 @@ func NewInterpreter(directory string) *Batch {
 	}
 }
 
-func collectBatchFiles(path string, info fs.FileInfo, err error) error {
-	if filepath.Ext(info.Name()) != ".BAT" {
+func collectBatchFiles(directory string) ([]string, error) {
+	var batchFiles []string
+	err := filepath.Walk(directory, func(path string, info fs.FileInfo, err error) error {
+		if filepath.Ext(info.Name()) != ".BAT" {
+			return nil
+		}
+		batchFiles = append(batchFiles, info.Name())
 		return nil
-	}
-	batchFiles = append(batchFiles, info.Name())
-	return nil
+	})
+	return batchFiles, err
 }
 
 func (b *Batch) SetArguments(args []string) {
