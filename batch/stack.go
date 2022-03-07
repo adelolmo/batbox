@@ -7,6 +7,8 @@ type executionStack struct {
 type executingBatchFile struct {
 	name       string
 	lineNumber int
+	variables  *map[string]string
+	arguments  map[string]string
 }
 
 func (f *executionStack) increaseExecutionLine() {
@@ -21,4 +23,12 @@ func (f *executionStack) drop() {
 
 func (f *executionStack) push(file executingBatchFile) {
 	f.fileStack = append(f.fileStack, file)
+}
+
+func (f *executionStack) top() (*executingBatchFile, bool) {
+	if len(f.fileStack) == 0 {
+		return nil, true
+	}
+	topElementIndex := len(f.fileStack) - 1
+	return &f.fileStack[topElementIndex], false
 }
