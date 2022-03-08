@@ -2,7 +2,6 @@ package batch
 
 import (
 	"bufio"
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -18,9 +17,10 @@ type Batch struct {
 	arguments      map[string]string
 	continueTo     string
 	executionStack executionStack
+	debug          bool
 }
 
-func NewInterpreter(directory string) *Batch {
+func NewInterpreter(directory string, debug bool) *Batch {
 	batchFiles, err := collectBatchFiles(directory)
 	if err != nil {
 		panic(err)
@@ -32,6 +32,7 @@ func NewInterpreter(directory string) *Batch {
 		batchFiles:     batchFiles,
 		continueTo:     "",
 		executionStack: executionStack{fileStack: []executingBatchFile{}},
+		debug:          debug,
 	}
 }
 
@@ -158,16 +159,4 @@ func (b *Batch) setCurrentFile(filename string) {
 		lineNumber: 0,
 	}
 	b.executionStack.push(batchFile)
-}
-
-func (b *Batch) logCommand(line string) {
-	if len(b.executionStack.fileStack) == 0 {
-		return
-	}
-
-	batchFile := b.executionStack.fileStack[len(b.executionStack.fileStack)-1]
-	_, err := fmt.Fprintf(out, "\t%v %d\t%v\n", batchFile.name, batchFile.lineNumber, line)
-	if err != nil {
-		panic(err)
-	}
 }

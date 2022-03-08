@@ -113,13 +113,11 @@ func TestBatch_parseIfStatement(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bat := &Batch{
-				directory:       tt.fields.directory,
-				batchFiles:      tt.fields.batchFiles,
-				variables:       tt.fields.variables,
-				currentFile:     tt.fields.currentFile,
-				currentFileLine: tt.fields.currentFileLine,
-				arguments:       tt.fields.arguments,
-				continueTo:      tt.fields.continueTo,
+				directory:  tt.fields.directory,
+				batchFiles: tt.fields.batchFiles,
+				variables:  tt.fields.variables,
+				arguments:  tt.fields.arguments,
+				continueTo: tt.fields.continueTo,
 			}
 			if got := bat.handleIf(tt.args.line); got != tt.want {
 				t.Errorf("handleIf() = %v, want %v", got, tt.want)
@@ -159,13 +157,11 @@ func TestBatch_handleEcho(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := Batch{
-				directory:       tt.fields.directory,
-				batchFiles:      tt.fields.batchFiles,
-				variables:       tt.fields.variables,
-				currentFile:     tt.fields.currentFile,
-				currentFileLine: tt.fields.currentFileLine,
-				arguments:       tt.fields.arguments,
-				continueTo:      tt.fields.continueTo,
+				directory:  tt.fields.directory,
+				batchFiles: tt.fields.batchFiles,
+				variables:  tt.fields.variables,
+				arguments:  tt.fields.arguments,
+				continueTo: tt.fields.continueTo,
 			}
 			b.handleEcho(tt.args.line)
 			got := strings.TrimSpace(buf.String())
@@ -215,13 +211,11 @@ func TestBatch_handleSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Batch{
-				directory:       tt.fields.directory,
-				batchFiles:      tt.fields.batchFiles,
-				variables:       tt.fields.variables,
-				currentFile:     tt.fields.currentFile,
-				currentFileLine: tt.fields.currentFileLine,
-				arguments:       tt.fields.arguments,
-				continueTo:      tt.fields.continueTo,
+				directory:  tt.fields.directory,
+				batchFiles: tt.fields.batchFiles,
+				variables:  tt.fields.variables,
+				arguments:  tt.fields.arguments,
+				continueTo: tt.fields.continueTo,
 			}
 			b.handleSet(tt.args.line)
 			for wantKey := range tt.want {
