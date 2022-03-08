@@ -18,12 +18,17 @@ var (
 func main() {
 	fmt.Printf("version: %s\n", Version)
 	directory := "."
-	if len(os.Args) > 1 {
-		directory = os.Args[1]
+	debug := false
+	for i := range os.Args[1:] {
+		if os.Args[i+1] == "-d" {
+			debug = true
+		} else {
+			directory = os.Args[i+1]
+		}
 	}
 	fmt.Printf("Using directory: %s\n", directory)
 
-	bat := batch.NewInterpreter(directory)
+	bat := batch.NewInterpreter(directory, debug)
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
