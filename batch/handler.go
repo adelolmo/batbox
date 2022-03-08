@@ -64,6 +64,7 @@ func (b *Batch) handleIf(line string) string {
 	}
 	secondPartVariable := b.resolveVariable(conditionParts[1])
 
+	b.log("\t%s=%s\n", conditionParts[0], firstPartValue)
 	if isNegation {
 		if firstPartValue != secondPartVariable {
 			return commandToExecute
