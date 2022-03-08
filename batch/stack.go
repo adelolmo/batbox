@@ -7,8 +7,13 @@ type executionStack struct {
 type executingBatchFile struct {
 	name       string
 	lineNumber int
-	variables  *map[string]string
 	arguments  map[string]string
+}
+
+func NewExecutionStack() *executionStack {
+	return &executionStack{
+		fileStack: []executingBatchFile{},
+	}
 }
 
 func (f *executionStack) increaseExecutionLine() {
