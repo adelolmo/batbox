@@ -21,6 +21,12 @@ func (b *Batch) handleClearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
+/*func (b *Batch) handleCall(line string) {
+	parts := strings.Split(line, " ")
+
+	err := b.processFile(parts[0])
+}
+*/
 func (b Batch) handleEchoDot() {
 	fmt.Fprintln(out)
 }
@@ -41,6 +47,10 @@ func (b *Batch) handleGoto(line string) {
 }
 
 func (b *Batch) handleIf(line string) string {
+	line = strings.ReplaceAll(line, "if not ", "IF NOT ")
+	line = strings.ReplaceAll(line, "if ", "IF ")
+	line = strings.ReplaceAll(line, " == ", "==")
+
 	var statement string
 	isNegation := false
 	statement = line[len("IF "):]

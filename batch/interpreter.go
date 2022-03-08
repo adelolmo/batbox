@@ -83,7 +83,8 @@ func (b *Batch) ExecuteCommand(line string) error {
 	if strings.HasPrefix(line, "@") {
 		return nil
 	}
-	if strings.HasPrefix(line, "REM ") {
+	allCapsLine := strings.ToUpper(line)
+	if strings.HasPrefix(allCapsLine, "REM ") {
 		return nil
 	}
 	b.logCommand(line)
@@ -91,25 +92,34 @@ func (b *Batch) ExecuteCommand(line string) error {
 	if isBat {
 		return b.processFile(filename)
 	}
-	if "PAUSE" == line {
+	if "PAUSE" == allCapsLine {
 		b.handlePause()
 	}
-	if "CLS" == line {
+	if "CLS" == allCapsLine {
 		b.handleClearScreen()
 	}
-	if strings.HasPrefix(line, "SET ") {
+	if strings.HasPrefix(allCapsLine, "CALL ") {
+		parts := strings.Split(line, " ")
+		cleanLine := strings.Join(parts[1:], " ")
+		filename, isBat := b.checkBatchFile(cleanLine)
+		if isBat {
+			return b.processFile(filename)
+		}
+		//b.handleCall(line)
+	}
+	if strings.HasPrefix(allCapsLine, "SET ") {
 		b.handleSet(line)
 	}
-	if strings.HasPrefix(line, "ECHO.") {
+	if strings.HasPrefix(allCapsLine, "ECHO.") {
 		b.handleEchoDot()
 	}
-	if strings.HasPrefix(line, "ECHO ") {
+	if strings.HasPrefix(allCapsLine, "ECHO ") {
 		b.handleEcho(line)
 	}
-	if strings.HasPrefix(line, "GOTO ") {
+	if strings.HasPrefix(allCapsLine, "GOTO ") {
 		b.handleGoto(line)
 	}
-	if strings.HasPrefix(line, "IF ") {
+	if strings.HasPrefix(allCapsLine, "IF ") {
 		commandToExecute := b.handleIf(line)
 		return b.ExecuteCommand(commandToExecute)
 	}

@@ -109,6 +109,18 @@ func TestBatch_parseIfStatement(t *testing.T) {
 			args:   args{line: "IF \"%1\"==\"turtle\" IF \"%&l5w%\"==\"a3w\" IF \"%&&a5w%\"==\"b7w\" GOTO v7e"},
 			want:   "IF \"%&l5w%\"==\"a3w\" IF \"%&&a5w%\"==\"b7w\" GOTO v7e",
 		},
+		{
+			name:   "if with white spaces",
+			fields: fields{variables: map[string]string{"hbr": "woods"}},
+			args:   args{line: "if \"%hbr%\" == \"woods\" goto woods"},
+			want:   "goto woods",
+		},
+		{
+			name:   "if not with white spaces",
+			fields: fields{},
+			args:   args{line: "if not \"%5\" == \"\" goto toomany"},
+			want:   "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
