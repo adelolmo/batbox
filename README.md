@@ -29,3 +29,8 @@ You can also install the binary without building the package.
 Execute the program running the following command:
 
     batbox
+
+## Run a game
+
+    batbox -d mechagodzilla
+    > RESTART
