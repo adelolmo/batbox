@@ -2,7 +2,12 @@
 The Terror of Mechagodzilla - The True Story by Fredrik Ramsberg
 
 ## Build
-The build process supports cross-platform compilation.
+
+To build the project:
+
+    make
+
+The build process supports cross platform compilation.
 To set the target architecture add the argument `ARCH` with the value when calling `make`.
 Supported architectures:
 * amd64
@@ -12,6 +17,22 @@ Supported architectures:
 
 
     make ARCH=armhf
+
+### Debian package
+
+As an additional step after building, you can create a debian package.
+
+    make debian
+
+To set the target architecture add the argument `ARCH` with the value when calling `make`.
+Supported architectures:
+* amd64
+* i386
+* armhf
+* arm64
+
+
+    make debian ARCH=armhf
 
 ## Install
 
