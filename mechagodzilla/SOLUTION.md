@@ -27,3 +27,4 @@ n
 enter tank
 s
 e
+shoot mecha
