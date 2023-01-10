@@ -8,6 +8,11 @@ s
 buy ammo
 buy napalm
 n
+w
+talk man godzilla
+w
+throw napalm mountain
+e
 n
 w
 shoot owner
@@ -21,8 +26,4 @@ throw turtle dog
 n
 enter tank
 s
-w
-w
-w
-talk man godzilla
-w
+e
