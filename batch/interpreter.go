@@ -80,12 +80,22 @@ func (b *Batch) ExecuteCommand(line string) error {
 	if len(line) == 0 {
 		return nil
 	}
-	if strings.HasPrefix(line, "@") {
+	allCapsLine := strings.ToUpper(line)
+	if strings.HasPrefix(allCapsLine, "@REM") {
 		return nil
 	}
-	allCapsLine := strings.ToUpper(line)
 	if strings.HasPrefix(allCapsLine, "REM ") {
 		return nil
+	}
+	if strings.HasPrefix(allCapsLine, "@ECHO") {
+		return nil
+	}
+	if strings.HasPrefix(allCapsLine, "@") {
+		parts := strings.Split(line[1:], " ")
+		filename, isBat := b.checkBatchFile(parts[0])
+		if isBat {
+			return b.processFile(filename)
+		}
 	}
 	b.logCommand(line)
 	filename, isBat := b.checkBatchFile(line)
