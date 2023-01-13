@@ -1,9 +1,12 @@
 # batbox
-Hobbit -- The True Story
+**Hobbit -- The True Story**
 
-The Terror of Mecha Godzilla -- The True Story 
+**The Terror of Mecha Godzilla -- The True Story**
 
 by Fredrik Ramsberg
+
+---
+
 
 I found these two conversational adventures here http://www.spagmag.org/archives/h.html#hobbit
 
@@ -55,5 +58,10 @@ Execute the program running the following command:
 
 ## Run a game
 
-    batbox -d mechagodzilla
+    batbox mechagodzilla
     > RESTART
+    
+To enable debugging add `-d` before the game:
+
+    batbox -d mechagodzilla
+    
