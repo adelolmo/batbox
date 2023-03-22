@@ -10,7 +10,7 @@ by Fredrik Ramsberg
 
 I found these two conversational adventures here http://www.spagmag.org/archives/h.html#hobbit
 
-The Terror of Mecha Godzilla is working correctly. The Hobbit not yet.
+The Terror of Mecha Godzilla is working correctly. The Hobbit is not yet fully tested.
 
     NAME: Hobbit - The True Story
     AUTHOR: Fredrik Ramsberg and Johan Berntsson
