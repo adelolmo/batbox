@@ -21,18 +21,19 @@ func (b *Batch) handleClearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
-/*func (b *Batch) handleCall(line string) {
-	parts := strings.Split(line, " ")
+/*
+	func (b *Batch) handleCall(line string) {
+		parts := strings.Split(line, " ")
 
-	err := b.processFile(parts[0])
-}
+		err := b.processFile(parts[0])
+	}
 */
-func (b Batch) handleEchoDot() {
-	fmt.Fprintln(out)
+func (b *Batch) handleEchoDot() {
+	_, _ = fmt.Fprintln(out)
 }
 
-func (b Batch) handleEcho(line string) {
-	fmt.Fprintln(out, line[len("ECHO "):])
+func (b *Batch) handleEcho(line string) {
+	_, _ = fmt.Fprintln(out, line[len("ECHO "):])
 }
 
 func (b *Batch) handleSet(line string) {
