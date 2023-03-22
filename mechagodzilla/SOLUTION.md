@@ -2,29 +2,29 @@
 
 ## Solution
 
-n
-w
-s
-buy ammo
-buy napalm
-n
-w
-talk man godzilla
-w
-throw napalm mountain
-e
-n
-w
-shoot owner
-take turtle
-e
-s
-e
-e
-n
-throw turtle dog
-n
-enter tank
-s
-e
-shoot mecha
+1. n
+1. w
+1. s
+1. buy ammo
+1. buy napalm
+1. n
+1. w
+1. talk man godzilla
+1. w
+1. throw napalm mountain
+1. e
+1. n
+1. w
+1. shoot owner
+1. take turtle
+1. e
+1. s
+1. e
+1. e
+1. n
+1. throw turtle dog
+1. n
+1. enter tank
+1. s
+1. e
+1. shoot mecha
