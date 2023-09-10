@@ -28,13 +28,13 @@ func TestBatch_parseIfStatement(t *testing.T) {
 		{
 			name:   "if variable 1st part",
 			fields: fields{variables: map[string]string{"&amg": "xxx"}},
-			args:   args{line: "IF \"%&amg%\"==\"xxx\" GOTO a5w"},
+			args:   args{line: `IF "%&amg%"=="xxx" GOTO a5w`},
 			want:   "GOTO a5w",
 		},
 		{
 			name:   "if not variable 1st part",
 			fields: fields{variables: map[string]string{"&amg": "xxx"}},
-			args:   args{line: "IF NOT \"%&amg%\"==\"xxx\" GOTO a5w"},
+			args:   args{line: `IF NOT "%&amg%"=="xxx" GOTO a5w`},
 			want:   "",
 		},
 		{
@@ -43,7 +43,7 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				"&amg": "nhk",
 				"&l5w": "nhk",
 			}},
-			args: args{line: "IF \"%&amg%\"==\"%&l5w%\" GOTO a5w"},
+			args: args{line: `IF "%&amg%"=="%&l5w%" GOTO a5w`},
 			want: "GOTO a5w",
 		},
 		{
@@ -52,19 +52,19 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				"&amg": "nhk",
 				"&l5w": "nhk",
 			}},
-			args: args{line: "IF NOT \"%&amg%\"==\"%&l5w%\" GOTO a5w"},
+			args: args{line: `IF NOT "%&amg%"=="%&l5w%" GOTO a5w`},
 			want: "",
 		},
 		{
 			name:   "if argument 1st part equals string",
 			fields: fields{arguments: map[string]string{"%1": "xxx"}},
-			args:   args{line: "IF \"%1\"==\"xxx\" GOTO a5w"},
+			args:   args{line: `IF "%1"=="xxx" GOTO a5w`},
 			want:   "GOTO a5w",
 		},
 		{
 			name:   "if not argument 1st part equals string",
 			fields: fields{arguments: map[string]string{"%1": "xxx"}},
-			args:   args{line: "IF NOT \"%1\"==\"xxx\" GOTO a5w"},
+			args:   args{line: `IF NOT "%1"=="xxx" GOTO a5w`},
 			want:   "",
 		},
 		{
@@ -73,7 +73,7 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				arguments: map[string]string{"%1": "xxx"},
 				variables: map[string]string{"&amg": "xxx"},
 			},
-			args: args{line: "IF \"%1\"==\"%&amg%\" GOTO a5w"},
+			args: args{line: `IF "%1"=="%&amg%" GOTO a5w`},
 			want: "GOTO a5w",
 		},
 		{
@@ -82,7 +82,7 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				arguments: map[string]string{"%1": "xxx"},
 				variables: map[string]string{"&amg": "yyy"},
 			},
-			args: args{line: "IF \"%1\"==\"%&amg%\" GOTO a5w"},
+			args: args{line: `IF "%1"=="%&amg%" GOTO a5w`},
 			want: "",
 		},
 		{
@@ -91,7 +91,7 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				arguments: map[string]string{"%1": "xxx"},
 				variables: map[string]string{"&amg": "xxx"},
 			},
-			args: args{line: "IF NOT \"%1\"==\"%&amg%\" GOTO a5w"},
+			args: args{line: `IF NOT "%1"=="%&amg%" GOTO a5w`},
 			want: "",
 		},
 		{
@@ -100,25 +100,25 @@ func TestBatch_parseIfStatement(t *testing.T) {
 				arguments: map[string]string{"%1": "xxx"},
 				variables: map[string]string{"&amg": "yyy"},
 			},
-			args: args{line: "IF NOT \"%1\"==\"%&amg%\" GOTO a5w"},
+			args: args{line: `IF NOT "%1"=="%&amg%" GOTO a5w`},
 			want: "GOTO a5w",
 		},
 		{
 			name:   "if nested",
 			fields: fields{arguments: map[string]string{"%1": "turtle"}},
-			args:   args{line: "IF \"%1\"==\"turtle\" IF \"%&l5w%\"==\"a3w\" IF \"%&&a5w%\"==\"b7w\" GOTO v7e"},
-			want:   "IF \"%&l5w%\"==\"a3w\" IF \"%&&a5w%\"==\"b7w\" GOTO v7e",
+			args:   args{line: `IF "%1"=="turtle" IF "%&l5w%"=="a3w" IF "%&&a5w%"=="b7w" GOTO v7e`},
+			want:   `IF "%&l5w%"=="a3w" IF "%&&a5w%"=="b7w" GOTO v7e`,
 		},
 		{
 			name:   "if with white spaces",
 			fields: fields{variables: map[string]string{"hbr": "woods"}},
-			args:   args{line: "if \"%hbr%\" == \"woods\" goto woods"},
+			args:   args{line: `if "%hbr%" == "woods" goto woods`},
 			want:   "goto woods",
 		},
 		{
 			name:   "if not with white spaces",
 			fields: fields{},
-			args:   args{line: "if not \"%5\" == \"\" goto toomany"},
+			args:   args{line: `if not "%5" == "" goto toomany`},
 			want:   "",
 		},
 	}
